@@ -3,10 +3,8 @@ const { linkStudent, getFeeStructure, submitApplication } = require('../controll
 const { protect } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
-router.use(protect);
-
-router.post('/students/link', linkStudent);
-router.get('/fee-structure/:id', getFeeStructure);
-router.post('/applications', submitApplication);
+router.post('/students/link', protect, linkStudent);
+router.get('/fee-structure/:id', protect, getFeeStructure);
+router.post('/applications', protect, submitApplication);
 
 module.exports = router;
