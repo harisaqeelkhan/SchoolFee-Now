@@ -7,13 +7,15 @@ exports.getSystemStats = async (req, res, next) => {
     const schools = await School.find();
     const students = await Student.find().populate('schoolId').populate('parentId');
     const parents = await User.find({ role: 'parent' });
+    const schoolAdmins = await User.find({ role: 'school_admin' });
 
     res.status(200).json({
       success: true,
       data: {
         schools,
         students,
-        parents
+        parents,
+        schoolAdmins
       }
     });
   } catch (error) {

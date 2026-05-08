@@ -27,18 +27,22 @@ const SystemDashboard = () => {
       <h1>System Master Dashboard</h1>
       <p style={{ marginBottom: '2rem', color: 'var(--text-light)' }}>Global view of all Schools, Students, and Parents.</p>
       
-      <div className="flex flex-col md:flex-row gap-4" style={{ marginBottom: '2rem' }}>
-        <div className="card metric-card">
+      <div className="flex flex-col md:flex-row gap-4" style={{ marginBottom: '2rem', flexWrap: 'wrap' }}>
+        <div className="card metric-card" style={{ flex: '1 1 200px' }}>
           <h3>Total Schools</h3>
           <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.schools.length}</p>
         </div>
-        <div className="card metric-card">
+        <div className="card metric-card" style={{ flex: '1 1 200px' }}>
           <h3>Total Registered Parents</h3>
           <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.parents.length}</p>
         </div>
-        <div className="card metric-card">
+        <div className="card metric-card" style={{ flex: '1 1 200px' }}>
           <h3>Total Students Linked</h3>
           <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.students.length}</p>
+        </div>
+        <div className="card metric-card black-bg" style={{ flex: '1 1 200px' }}>
+          <h3>School Admins</h3>
+          <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.schoolAdmins?.length || 0}</p>
         </div>
       </div>
 
@@ -47,6 +51,15 @@ const SystemDashboard = () => {
         <ul>
           {stats.schools.map(school => (
             <li key={school._id}>{school.name} (Reg: {school.registrationNo})</li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="card" style={{ marginBottom: '2rem' }}>
+        <h3>School Administrators</h3>
+        <ul>
+          {stats.schoolAdmins?.length === 0 ? <li>No School Admins Registered.</li> : stats.schoolAdmins?.map(admin => (
+            <li key={admin._id}>{admin.name} ({admin.email})</li>
           ))}
         </ul>
       </div>
