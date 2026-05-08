@@ -21,7 +21,7 @@ exports.register = async (req, res, next) => {
       email,
       passwordHash,
       cnic,
-      role: 'parent', // Force public registration to parent (Req 28)
+      role: ['parent', 'student', 'school_admin'].includes(role) ? role : 'parent',
     });
 
     // Automatically create a Wallet document linked to this User with 50000 sign-up bonus

@@ -24,9 +24,9 @@ const Landing = () => {
           <h3>School Portal</h3>
           <Link to="/login" className="btn btn-secondary" style={{ width: '100%', marginTop: '1rem' }}>Login as School</Link>
         </div>
-        <div className="card" style={{ width: '200px' }}>
-          <h3>System Admin</h3>
-          <Link to="/login" className="btn btn-secondary" style={{ width: '100%', marginTop: '1rem' }}>Master Login</Link>
+        <div className="card" style={{ width: '200px', border: '2px solid var(--primary)' }}>
+          <h3>App Admin Portal</h3>
+          <Link to="/admin/login" className="btn btn-secondary" style={{ width: '100%', marginTop: '1rem' }}>Master Login</Link>
         </div>
       </div>
 

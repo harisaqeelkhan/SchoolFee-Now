@@ -5,7 +5,7 @@ import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import api from '../../services/api';
 
 const Register = () => {
-  const [formData, setFormData] = useState({ fullName: '', email: '', password: '', cnic: '', age: '' });
+  const [formData, setFormData] = useState({ fullName: '', email: '', password: '', cnic: '', age: '', role: 'parent' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
@@ -55,6 +55,14 @@ const Register = () => {
           <div className="form-group">
             <label>Age</label>
             <input type="number" name="age" className="form-input" value={formData.age} onChange={handleChange} required />
+          </div>
+          <div className="form-group">
+            <label>Register As (Role)</label>
+            <select name="role" className="form-input" value={formData.role} onChange={handleChange} required>
+              <option value="parent">Parent</option>
+              <option value="student">Student</option>
+              <option value="school_admin">School Admin</option>
+            </select>
           </div>
           <button type="submit" className="btn btn-primary w-full" disabled={loading}>
             {loading ? <LoadingSpinner /> : 'Register'}

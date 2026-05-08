@@ -7,6 +7,7 @@ import Layout from '../components/layout/Layout';
 // Public Pages
 import Landing from '../pages/public/Landing';
 import Login from '../pages/public/Login';
+import AdminLogin from '../pages/public/AdminLogin';
 import Register from '../pages/public/Register';
 import NotFound from '../pages/public/NotFound';
 
@@ -42,6 +43,7 @@ const AppRoutes = () => {
         {/* Public Routes */}
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/register" element={<Register />} />
 
         {/* Parent Protected Routes */}
