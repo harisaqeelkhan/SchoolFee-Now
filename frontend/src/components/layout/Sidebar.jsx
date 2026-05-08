@@ -28,6 +28,9 @@ const Sidebar = () => {
 
   const systemAdminLinks = [
     { name: 'System Dashboard', path: '/system/dashboard', icon: <FaHome /> },
+    { name: 'Registered Schools', path: '/system/schools', icon: <FaList /> },
+    { name: 'School Admins', path: '/system/admins', icon: <FaUsers /> },
+    { name: 'All Students', path: '/system/students', icon: <FaUsers /> },
   ];
 
   const studentLinks = [

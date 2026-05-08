@@ -45,33 +45,6 @@ const SystemDashboard = () => {
           <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.schoolAdmins?.length || 0}</p>
         </div>
       </div>
-
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <h3>Registered Schools</h3>
-        <ul>
-          {stats.schools.map(school => (
-            <li key={school._id}>{school.name} (Reg: {school.registrationNo})</li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <h3>School Administrators</h3>
-        <ul>
-          {stats.schoolAdmins?.length === 0 ? <li>No School Admins Registered.</li> : stats.schoolAdmins?.map(admin => (
-            <li key={admin._id}>{admin.name} ({admin.email})</li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="card">
-        <h3>All Students</h3>
-        <ul>
-          {stats.students.map(student => (
-            <li key={student._id}>{student.fullName} (School ID: {student.studentId}) - Parent: {student.parentId?.name || 'Unlinked'}</li>
-          ))}
-        </ul>
-      </div>
     </div>
   );
 };

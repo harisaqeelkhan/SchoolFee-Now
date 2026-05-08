@@ -22,17 +22,17 @@ const Expenses = () => {
     <div>
       <h1 style={{ marginBottom: '2rem' }}>Educational Expenses Tracker</h1>
       <p style={{ color: 'var(--text-light)', marginBottom: '2rem' }}>
-        Manage your child's out-of-pocket educational expenses. (Local Demo Mode)
+        Manage your child's out-of-pocket educational expenses.
       </p>
       
       <div className="card" style={{ marginBottom: '2rem' }}>
         <h3>Log New Expense</h3>
-        <form onSubmit={handleAdd} className="flex flex-col md:flex-row gap-4 mt-4" style={{ marginTop: '1rem' }}>
-          <input type="text" className="form-input" placeholder="Title (e.g. Notebooks)" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
-          <input type="text" className="form-input" placeholder="Category" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required />
-          <input type="number" className="form-input" placeholder="Amount (PKR)" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} required />
-          <input type="date" className="form-input" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} required />
-          <button type="submit" className="btn btn-primary" style={{ minWidth: '120px' }}>Save Expense</button>
+        <form onSubmit={handleAdd} className="flex flex-col md:flex-row gap-4 mt-4" style={{ marginTop: '1rem', alignItems: 'center' }}>
+          <input type="text" className="form-input" placeholder="Title (e.g. Notebooks)" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required style={{ flex: 1 }} />
+          <input type="text" className="form-input" placeholder="Category" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required style={{ flex: 1 }} />
+          <input type="number" className="form-input" placeholder="Amount (PKR)" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} required style={{ flex: 1 }} />
+          <input type="date" className="form-input" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} required style={{ flex: 1 }} />
+          <button type="submit" className="btn btn-primary" style={{ whiteSpace: 'nowrap', height: '42px', padding: '0 1.5rem' }}>Save Expense</button>
         </form>
       </div>
 

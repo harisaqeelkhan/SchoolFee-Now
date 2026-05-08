@@ -16,7 +16,7 @@ mongoose.connect(process.env.MONGO_URI).then(async () => {
 
     // Create custom admin
     await User.create({
-      name: 'System Admin (Testing)',
+      name: 'System Admin',
       email: 'admin',
       passwordHash: hash,
       role: 'system_admin'

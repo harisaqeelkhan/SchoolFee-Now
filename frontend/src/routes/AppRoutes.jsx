@@ -34,6 +34,9 @@ import AdminReports from '../pages/admin/AdminReports';
 
 // New Portals
 import SystemDashboard from '../pages/admin/SystemDashboard';
+import SystemSchools from '../pages/admin/SystemSchools';
+import SystemAdmins from '../pages/admin/SystemAdmins';
+import SystemStudents from '../pages/admin/SystemStudents';
 import StudentDashboard from '../pages/public/StudentDashboard';
 
 const AppRoutes = () => {
@@ -75,6 +78,9 @@ const AppRoutes = () => {
 
         <Route element={<ProtectedRoute allowedRoles={['system_admin']} />}>
           <Route path="/system/dashboard" element={<SystemDashboard />} />
+          <Route path="/system/schools" element={<SystemSchools />} />
+          <Route path="/system/admins" element={<SystemAdmins />} />
+          <Route path="/system/students" element={<SystemStudents />} />
         </Route>
         
         <Route element={<ProtectedRoute allowedRoles={['student']} />}>
