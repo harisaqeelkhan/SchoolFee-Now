@@ -11,7 +11,7 @@ const Layout = ({ children }) => {
       <Navbar />
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         {user && <Sidebar />}
-        <main style={{ flex: 1, padding: '2rem', overflowY: 'auto', background: 'var(--bg-main)' }}>
+        <main style={{ flex: 1, padding: '2.5rem', overflowY: 'auto', background: 'var(--bg-main)' }}>
           <div className="max-w-7xl w-full mx-auto">
             {children}
           </div>

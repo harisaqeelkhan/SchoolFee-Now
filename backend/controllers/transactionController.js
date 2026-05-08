@@ -2,7 +2,7 @@ const Transaction = require('../models/Transaction');
 
 exports.getTransactions = async (req, res, next) => {
   try {
-    const { type, status, startDate, endDate, category, search } = req.query;
+    const { type, status, startDate, endDate, category, search, page = 1, limit = 20 } = req.query;
     
     let query = {
       $or: [
@@ -26,12 +26,24 @@ exports.getTransactions = async (req, res, next) => {
       query.$or.push({ description: { $regex: search, $options: 'i' } });
     }
 
+    const skip = (parseInt(page) - 1) * parseInt(limit);
     const transactions = await Transaction.find(query)
       .populate('senderId', 'name email')
       .populate('receiverId', 'name email')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
 
-    res.status(200).json({ success: true, data: transactions });
+    const total = await Transaction.countDocuments(query);
+
+    res.status(200).json({ 
+      success: true, 
+      count: transactions.length,
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / parseInt(limit)),
+      data: transactions 
+    });
   } catch (error) {
     next(error);
   }

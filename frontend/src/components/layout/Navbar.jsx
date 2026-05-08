@@ -14,7 +14,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav style={{ background: 'var(--surface)', padding: '1rem', borderBottom: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <nav style={{ background: 'var(--surface)', padding: '1.25rem 2rem', borderBottom: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 10 }}>
       <div>
         <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
           <img src={logo} alt="SchoolFee Now Logo" style={{ height: '40px', objectFit: 'contain' }} />

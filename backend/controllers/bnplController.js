@@ -112,3 +112,105 @@ exports.submitApplication = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getPaymentPlans = async (req, res, next) => {
+  try {
+    const plans = await PaymentPlan.find({ parentId: req.user._id }).populate('studentId', 'fullName studentId');
+    res.status(200).json({ success: true, data: plans });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getInstallments = async (req, res, next) => {
+  try {
+    let query = {};
+    if (req.query.planId) {
+      const plan = await PaymentPlan.findOne({ _id: req.query.planId, parentId: req.user._id });
+      if (!plan) {
+        res.status(404);
+        throw new Error('Payment plan not found');
+      }
+      query.planId = req.query.planId;
+    } else {
+      const plans = await PaymentPlan.find({ parentId: req.user._id });
+      const planIds = plans.map(p => p._id);
+      query.planId = { $in: planIds };
+    }
+
+    const installments = await Installment.find(query).sort({ dueDate: 1 });
+    res.status(200).json({ success: true, data: installments });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.payInstallment = async (req, res, next) => {
+  const mongoose = require('mongoose');
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const installmentId = req.params.id;
+    const installment = await Installment.findById(installmentId).session(session);
+
+    if (!installment) {
+      res.status(404);
+      throw new Error('Installment not found');
+    }
+
+    if (installment.status === 'paid') {
+      res.status(400);
+      throw new Error('Installment is already paid');
+    }
+
+    const plan = await PaymentPlan.findById(installment.planId).session(session);
+    if (!plan || plan.parentId.toString() !== req.user._id.toString()) {
+      res.status(404);
+      throw new Error('Associated payment plan not found or unauthorized');
+    }
+
+    const Wallet = require('../models/Wallet');
+    const wallet = await Wallet.findOne({ userId: req.user._id }).session(session);
+
+    if (!wallet || wallet.balance < installment.amount) {
+      res.status(400);
+      throw new Error('Insufficient wallet balance');
+    }
+
+    wallet.balance -= installment.amount;
+    await wallet.save({ session });
+
+    installment.status = 'paid';
+    await installment.save({ session });
+
+    const remainingInstallments = await Installment.countDocuments({
+      planId: plan._id,
+      status: 'scheduled'
+    }).session(session);
+
+    if (remainingInstallments === 0) {
+      plan.status = 'completed';
+      await plan.save({ session });
+    }
+
+    const Transaction = require('../models/Transaction');
+    await Transaction.create([{
+      transactionId: `TXN-BNPL-PAY-${Date.now()}`,
+      type: 'fee',
+      amount: installment.amount,
+      status: 'successful',
+      senderId: req.user._id,
+      description: `Paid BNPL installment for Plan ${plan._id}`
+    }], { session });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(200).json({ success: true, message: 'Installment paid successfully', data: installment });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    next(error);
+  }
+};

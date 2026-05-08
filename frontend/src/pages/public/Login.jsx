@@ -1,9 +1,10 @@
 import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import AlertError from '../../components/ui/AlertError';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import api from '../../services/api';
+import { getDefaultRouteForRole } from '../../utils/roleConfig';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -13,15 +14,17 @@ const Login = () => {
   
   const { user, login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
 
   React.useEffect(() => {
     if (user) {
-      if (user.role === 'system_admin') navigate('/system/dashboard');
-      else if (user.role === 'school_admin') navigate('/admin/dashboard');
-      else if (user.role === 'student') navigate('/student/dashboard');
-      else navigate('/dashboard');
+      if (location.state?.expectedRole && user.role !== location.state.expectedRole) {
+        setError(`You are currently logged in as a ${user.role}. Please log out first.`);
+        return;
+      }
+      navigate(getDefaultRouteForRole(user.role));
     }
-  }, [user, navigate]);
+  }, [user, navigate, location.state]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -30,16 +33,7 @@ const Login = () => {
     try {
       const { data } = await api.post('/auth/login', { email, password });
       login(data.data, data.data.token);
-      
-      if (data.data.role === 'system_admin') {
-        navigate('/system/dashboard');
-      } else if (data.data.role === 'school_admin') {
-        navigate('/admin/dashboard');
-      } else if (data.data.role === 'student') {
-        navigate('/student/dashboard');
-      } else {
-        navigate('/dashboard');
-      }
+      navigate(getDefaultRouteForRole(data.data.role));
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid credentials');
       setLoading(false);
@@ -47,9 +41,9 @@ const Login = () => {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '4rem auto' }}>
-      <div className="card">
-        <h2 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>Login</h2>
+    <div className="animate-fade-in" style={{ maxWidth: '420px', margin: '5rem auto' }}>
+      <div className="card" style={{ borderTop: '4px solid var(--primary)', padding: '2.5rem 2rem' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '2rem', letterSpacing: '-0.02em' }}>Welcome Back</h2>
         {error && <AlertError message={error} />}
         <form onSubmit={handleLogin}>
           <div className="form-group">

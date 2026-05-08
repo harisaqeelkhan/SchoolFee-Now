@@ -1,26 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import api from '../../services/api';
+import React from 'react';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import AlertError from '../../components/ui/AlertError';
+import MetricCard from '../../components/dashboard/MetricCard';
+import { useFetch } from '../../hooks/useFetch';
 
 const AdminDashboard = () => {
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const { data } = await api.get('/admin/dashboard');
-        setStats(data.data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStats();
-  }, []);
+  const { data: stats, loading, error } = useFetch('/admin/dashboard');
 
   if (loading) return <LoadingSpinner />;
+  
+  if (error) return <AlertError message={error} />;
 
   return (
     <div>
@@ -30,28 +19,31 @@ const AdminDashboard = () => {
       </p>
 
       {stats ? (
-        <div className="flex flex-col md:flex-row gap-4" style={{ flexWrap: 'wrap' }}>
-          <div className="card metric-card" style={{ flex: '1 1 200px' }}>
-            <h3>Total Users</h3>
-            <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.totalUsers}</p>
-          </div>
-          <div className="card metric-card" style={{ flex: '1 1 200px' }}>
-            <h3>Blocked Users</h3>
-            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ef4444' }}>{stats.blockedUsers}</p>
-          </div>
-          <div className="card metric-card" style={{ flex: '1 1 200px' }}>
-            <h3>Flagged Transactions</h3>
-            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>{stats.flaggedTransactions}</p>
-          </div>
-          <div className="card metric-card black-bg" style={{ flex: '1 1 200px' }}>
-            <h3>Total Transaction Volume</h3>
-            <p style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>PKR {stats.transactionVolume.toLocaleString()}</p>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ marginBottom: '2.5rem' }}>
+          <MetricCard 
+            title="Total Enrolled Users" 
+            value={stats.totalUsers} 
+          />
+          <MetricCard 
+            title="Total Transaction Volume" 
+            value={`PKR ${stats.transactionVolume.toLocaleString()}`} 
+            isHighlighted={true} 
+          />
+          <MetricCard 
+            title="Blocked Users" 
+            value={stats.blockedUsers} 
+            valueColor="var(--accent-red)"
+          />
+          <MetricCard 
+            title="Flagged Transactions" 
+            value={stats.flaggedTransactions} 
+            valueColor="var(--accent-orange)"
+          />
         </div>
       ) : (
-        <div className="card" style={{ padding: '2rem', textAlign: 'center' }}>
-          <h3 style={{ color: 'var(--text-light)' }}>Reporting Module Syncing...</h3>
-          <p>Your institutional data is currently being integrated with the live BNPL engine.</p>
+        <div className="empty-state" style={{ padding: '3rem' }}>
+          <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-dark)' }}>Reporting Module Syncing</h3>
+          <p style={{ fontSize: '0.95rem' }}>Your institutional data is currently being integrated with the live BNPL engine.</p>
         </div>
       )}
     </div>

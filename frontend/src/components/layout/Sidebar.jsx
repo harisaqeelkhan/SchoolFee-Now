@@ -39,8 +39,8 @@ const Sidebar = () => {
                 user.role === 'student' ? studentLinks : parentLinks;
 
   return (
-    <aside style={{ width: '250px', background: 'var(--surface)', borderRight: '1px solid var(--border-light)', padding: '1rem', height: 'calc(100vh - 64px)', overflowY: 'auto' }}>
-      <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+    <aside style={{ width: '260px', background: 'var(--surface)', borderRight: '1px solid var(--border-light)', padding: '1.5rem', height: 'calc(100vh - 72px)', overflowY: 'auto' }}>
+      <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
         {links.map((link) => {
           const isActive = location.pathname === link.path;
           return (
@@ -51,11 +51,14 @@ const Sidebar = () => {
                   display: 'flex', 
                   alignItems: 'center', 
                   gap: '0.75rem', 
-                  padding: '0.75rem', 
+                  padding: '0.75rem 1rem', 
                   borderRadius: '4px',
                   background: isActive ? 'var(--bg-main)' : 'transparent',
-                  color: isActive ? 'var(--primary)' : 'var(--text-dark)',
-                  fontWeight: isActive ? 'bold' : 'normal',
+                  color: isActive ? 'var(--primary)' : 'var(--text-muted)',
+                  fontWeight: isActive ? '500' : '400',
+                  fontFamily: 'var(--font-display)',
+                  transition: 'all 0.2s ease',
+                  borderLeft: isActive ? '3px solid var(--primary)' : '3px solid transparent'
                 }}
               >
                 {link.icon} {link.name}

@@ -47,7 +47,7 @@ const AppRoutes = () => {
         <Route path="/register" element={<Register />} />
 
         {/* Parent Protected Routes */}
-        <Route element={<ProtectedRoute />}>
+        <Route element={<ProtectedRoute allowedRoles={['parent']} />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/bnpl/apply" element={<BNPLApply />} />
@@ -73,8 +73,11 @@ const AppRoutes = () => {
           <Route path="/admin/profile" element={<Profile />} />
         </Route>
 
-        <Route element={<ProtectedRoute />}>
+        <Route element={<ProtectedRoute allowedRoles={['system_admin']} />}>
           <Route path="/system/dashboard" element={<SystemDashboard />} />
+        </Route>
+        
+        <Route element={<ProtectedRoute allowedRoles={['student']} />}>
           <Route path="/student/dashboard" element={<StudentDashboard />} />
         </Route>
 

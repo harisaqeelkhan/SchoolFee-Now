@@ -4,6 +4,7 @@ import { AuthContext } from '../../context/AuthContext';
 import AlertError from '../../components/ui/AlertError';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import api from '../../services/api';
+import { getDefaultRouteForRole } from '../../utils/roleConfig';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
@@ -26,7 +27,7 @@ const AdminLogin = () => {
       }
 
       login(data.data, data.data.token);
-      navigate('/system/dashboard');
+      navigate(getDefaultRouteForRole(data.data.role));
     } catch (err) {
       setError(err.message || err.response?.data?.message || 'Invalid credentials');
       setLoading(false);
@@ -34,10 +35,10 @@ const AdminLogin = () => {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '4rem auto' }}>
-      <div className="card" style={{ borderTop: '4px solid red' }}>
-        <h2 style={{ textAlign: 'center', marginBottom: '1.5rem', color: 'red' }}>App Admin Portal</h2>
-        <p style={{ textAlign: 'center', marginBottom: '1rem' }}>Restricted Access</p>
+    <div className="animate-fade-in" style={{ maxWidth: '420px', margin: '5rem auto' }}>
+      <div className="card" style={{ borderTop: '4px solid var(--accent-red)', padding: '2.5rem 2rem' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: '0.5rem', fontSize: '2rem', letterSpacing: '-0.02em', color: 'var(--accent-red)' }}>System Portal</h2>
+        <p style={{ textAlign: 'center', marginBottom: '2rem', color: 'var(--text-muted)' }}>Authorized personnel only.</p>
         {error && <AlertError message={error} />}
         <form onSubmit={handleLogin}>
           <div className="form-group">
@@ -60,7 +61,7 @@ const AdminLogin = () => {
               required 
             />
           </div>
-          <button type="submit" className="btn btn-primary w-full" disabled={loading} style={{ background: 'red' }}>
+          <button type="submit" className="btn btn-primary w-full" disabled={loading} style={{ backgroundColor: 'var(--accent-red)' }}>
             {loading ? <LoadingSpinner /> : 'Secure Login'}
           </button>
         </form>

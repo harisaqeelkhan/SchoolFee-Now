@@ -1,89 +1,77 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import api from '../../services/api';
+import AlertError from '../../components/ui/AlertError';
+import MetricCard from '../../components/dashboard/MetricCard';
+import TransactionTable from '../../components/dashboard/TransactionTable';
+import ExpenseChart from '../../components/dashboard/ExpenseChart';
+import { useFetch } from '../../hooks/useFetch';
 
 const Dashboard = () => {
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState(null);
+  const { data: walletData, loading: walletLoading, error: walletError } = useFetch('/wallet');
+  const { data: txnData, loading: txnLoading, error: txnError } = useFetch('/transactions?limit=5');
+  const { data: plansData, loading: plansLoading } = useFetch('/bnpl/plans');
+  const { data: summaryData, loading: summaryLoading } = useFetch('/transactions/summary');
 
-  useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const { data: walletData } = await api.get('/wallet');
-        const { data: txnData } = await api.get('/transactions?limit=5');
-        
-        // Mock BNPL active plans fetch since we don't have a direct endpoint yet
-        // In a real app we'd fetch from /api/bnpl/plans
-        
-        setData({
-          balance: walletData.data.balance,
-          activePlans: 1, // Updating this to 1 so you can see it registers!
-          totalExpenses: 0, 
-          transactions: txnData.data.slice(0, 5)
-        });
-        setLoading(false);
-      } catch (err) {
-        console.error(err);
-        setLoading(false);
-      }
-    };
-    fetchDashboard();
-  }, []);
+  if (walletLoading || txnLoading || plansLoading || summaryLoading) return <LoadingSpinner />;
+  
+  if (walletError || txnError) {
+    return <AlertError message={walletError || txnError} />;
+  }
 
-  if (loading) return <LoadingSpinner />;
+  const activePlansCount = plansData ? plansData.filter(p => p.status === 'active').length : 0;
+  const totalExpenses = summaryData ? summaryData.reduce((acc, curr) => acc + curr.totalAmount, 0) : 0;
+
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const chartData = summaryData && summaryData.length > 0 
+    ? summaryData.slice(0, 6).reverse().map(item => {
+        const d = new Date(item._id + '-01');
+        return {
+          label: monthNames[d.getMonth()],
+          expense: item.totalAmount,
+          bnpl: 0 // Mocked split for MVP
+        };
+      }) 
+    : undefined;
+
+  const dashboardData = {
+    balance: walletData?.balance || 0,
+    activePlans: activePlansCount,
+    totalExpenses: totalExpenses,
+    transactions: txnData || []
+  };
 
   return (
-    <div>
-      <h1 style={{ marginBottom: '2rem' }}>Parent Dashboard</h1>
+    <div className="animate-fade-in">
+      <div className="flex justify-between items-center" style={{ marginBottom: '2rem' }}>
+        <h1 style={{ marginBottom: 0 }}>Parent Dashboard</h1>
+        <button className="btn btn-primary" onClick={() => window.location.href='/bnpl/apply'}>Apply for BNPL</button>
+      </div>
+      
       <div className="flex flex-col md:flex-row gap-4" style={{ marginBottom: '2rem' }}>
-        <div className="card metric-card black-bg" style={{ flex: 1 }}>
-          <h3>Total Demo Balance</h3>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>PKR {data.balance.toLocaleString()}</p>
-        </div>
-        <div className="card metric-card" style={{ flex: 1 }}>
-          <h3>Active BNPL Plans</h3>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{data.activePlans}</p>
-        </div>
-        <div className="card metric-card" style={{ flex: 1 }}>
-          <h3>Total Expenses</h3>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>PKR {data.totalExpenses.toLocaleString()}</p>
-        </div>
+        <MetricCard 
+          title="Total Demo Balance" 
+          value={`PKR ${dashboardData.balance.toLocaleString()}`} 
+          isHighlighted={true} 
+        />
+        <MetricCard 
+          title="Active BNPL Plans" 
+          value={dashboardData.activePlans} 
+        />
+        <MetricCard 
+          title="Total Expenses" 
+          value={`PKR ${dashboardData.totalExpenses.toLocaleString()}`} 
+        />
       </div>
 
-      <div className="card" style={{ marginBottom: '2rem', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-main)' }}>
-        <p style={{ color: 'var(--text-light)' }}>[ Chart Placeholder: Monthly Expenses vs BNPL Payments ]</p>
+      <div style={{ marginBottom: '2.5rem' }}>
+        <ExpenseChart data={chartData} />
       </div>
 
-      <div className="card">
-        <h3>Recent Transactions</h3>
-        <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Type</th>
-                <th>Amount</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.transactions.length === 0 ? (
-                <tr>
-                  <td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-light)' }}>No transactions found</td>
-                </tr>
-              ) : (
-                data.transactions.map((txn, i) => (
-                  <tr key={txn._id}>
-                    <td>{txn.transactionId}</td>
-                    <td style={{ textTransform: 'capitalize' }}>{txn.type}</td>
-                    <td>{txn.amount}</td>
-                    <td>{txn.status}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ margin: 0 }}>Recent Transactions</h3>
         </div>
+        <TransactionTable transactions={dashboardData.transactions} />
       </div>
     </div>
   );

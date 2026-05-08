@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Wallet = require('../models/Wallet');
 const Transaction = require('../models/Transaction');
+const Student = require('../models/Student');
 const { createNotification } = require('./notificationController');
 
 exports.getUsers = async (req, res, next) => {
@@ -76,8 +77,24 @@ exports.toggleUserBlock = async (req, res, next) => {
 
 exports.getWallets = async (req, res, next) => {
   try {
-    const wallets = await Wallet.find().populate('userId', 'name email');
-    res.status(200).json({ success: true, data: wallets });
+    const { page = 1, limit = 20 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    const wallets = await Wallet.find()
+      .populate('userId', 'name email')
+      .skip(skip)
+      .limit(parseInt(limit));
+      
+    const total = await Wallet.countDocuments();
+    
+    res.status(200).json({ 
+      success: true, 
+      count: wallets.length,
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / parseInt(limit)),
+      data: wallets 
+    });
   } catch (error) {
     next(error);
   }
@@ -151,12 +168,16 @@ exports.getDashboardData = async (req, res, next) => {
     const totalTransactions = await Transaction.countDocuments();
     const flaggedTransactions = await Transaction.countDocuments({ suspiciousFlag: true });
     
-    // Calculate transaction volume
-    const allTxns = await Transaction.find({ status: 'successful' });
-    const transactionVolume = allTxns.reduce((acc, curr) => acc + curr.amount, 0);
+    const volumeAgg = await Transaction.aggregate([
+      { $match: { status: 'successful' } },
+      { $group: { _id: null, total: { $sum: "$amount" } } }
+    ]);
+    const transactionVolume = volumeAgg[0]?.total || 0;
 
-    const wallets = await Wallet.find();
-    const totalDemoBalance = wallets.reduce((acc, curr) => acc + curr.balance, 0);
+    const balanceAgg = await Wallet.aggregate([
+      { $group: { _id: null, total: { $sum: "$balance" } } }
+    ]);
+    const totalDemoBalance = balanceAgg[0]?.total || 0;
 
     res.status(200).json({
       success: true,
@@ -177,9 +198,11 @@ exports.getDashboardData = async (req, res, next) => {
 
 exports.getTransactionVolume = async (req, res, next) => {
   try {
-    const allTxns = await Transaction.find({ status: 'successful' });
-    const volume = allTxns.reduce((acc, curr) => acc + curr.amount, 0);
-    res.status(200).json({ success: true, data: { transactionVolume: volume } });
+    const volumeAgg = await Transaction.aggregate([
+      { $match: { status: 'successful' } },
+      { $group: { _id: null, total: { $sum: "$amount" } } }
+    ]);
+    res.status(200).json({ success: true, data: { transactionVolume: volumeAgg[0]?.total || 0 } });
   } catch (error) {
     next(error);
   }
@@ -187,9 +210,37 @@ exports.getTransactionVolume = async (req, res, next) => {
 
 exports.getSystemBalance = async (req, res, next) => {
   try {
-    const wallets = await Wallet.find();
-    const totalDemoBalance = wallets.reduce((acc, curr) => acc + curr.balance, 0);
-    res.status(200).json({ success: true, data: { systemBalance: totalDemoBalance } });
+    const balanceAgg = await Wallet.aggregate([
+      { $group: { _id: null, total: { $sum: "$balance" } } }
+    ]);
+    res.status(200).json({ success: true, data: { systemBalance: balanceAgg[0]?.total || 0 } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.registerStudent = async (req, res, next) => {
+  try {
+    const { schoolId, studentId, fullName } = req.body;
+    
+    if (!schoolId || !studentId || !fullName) {
+      res.status(400);
+      throw new Error('Please provide schoolId, studentId, and fullName');
+    }
+
+    const studentExists = await Student.findOne({ studentId });
+    if (studentExists) {
+      res.status(400);
+      throw new Error('Student ID already registered');
+    }
+
+    const student = await Student.create({
+      schoolId,
+      studentId,
+      fullName
+    });
+
+    res.status(201).json({ success: true, data: student, message: 'Student registered successfully' });
   } catch (error) {
     next(error);
   }

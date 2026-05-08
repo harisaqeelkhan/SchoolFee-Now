@@ -21,6 +21,8 @@ exports.getWallet = async (req, res, next) => {
 exports.getWalletSummary = exports.getWallet; // Same payload for now
 
 exports.deposit = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     const { amount } = req.body;
     
@@ -29,7 +31,7 @@ exports.deposit = async (req, res, next) => {
       throw new Error('Amount must be positive');
     }
 
-    const wallet = await Wallet.findOne({ userId: req.user._id });
+    const wallet = await Wallet.findOne({ userId: req.user._id }).session(session);
     if (!wallet) {
       res.status(404);
       throw new Error('Wallet not found');
@@ -37,11 +39,11 @@ exports.deposit = async (req, res, next) => {
 
     wallet.balance += amount;
     wallet.totalDeposits += amount;
-    await wallet.save();
+    await wallet.save({ session });
 
     const { suspiciousFlag, suspiciousReasons } = checkSuspicious(req.user, amount, 'deposit', null);
 
-    const transaction = await Transaction.create({
+    const transaction = await Transaction.create([{
       transactionId: `TXN-${Date.now()}`,
       receiverId: req.user._id,
       amount,
@@ -49,20 +51,26 @@ exports.deposit = async (req, res, next) => {
       status: 'successful',
       suspiciousFlag,
       suspiciousReasons,
-    });
+    }], { session });
 
-    await createNotification(req.user._id, 'Deposit Successful', `Deposited PKR ${amount}`, 'transaction', transaction._id);
+    await createNotification(req.user._id, 'Deposit Successful', `Deposited PKR ${amount}`, 'transaction', transaction[0]._id);
     if (suspiciousFlag) {
-      await createNotification(req.user._id, 'Suspicious Activity Detected', 'Your recent deposit was flagged.', 'security', transaction._id);
+      await createNotification(req.user._id, 'Suspicious Activity Detected', 'Your recent deposit was flagged.', 'security', transaction[0]._id);
     }
 
-    res.status(200).json({ success: true, data: { wallet, transaction } });
+    await session.commitTransaction();
+    res.status(200).json({ success: true, data: { wallet, transaction: transaction[0] } });
   } catch (error) {
+    await session.abortTransaction();
     next(error);
+  } finally {
+    session.endSession();
   }
 };
 
 exports.withdraw = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     const { amount } = req.body;
     
@@ -71,7 +79,7 @@ exports.withdraw = async (req, res, next) => {
       throw new Error('Amount must be positive');
     }
 
-    const wallet = await Wallet.findOne({ userId: req.user._id });
+    const wallet = await Wallet.findOne({ userId: req.user._id }).session(session);
     if (!wallet) {
       res.status(404);
       throw new Error('Wallet not found');
@@ -79,14 +87,14 @@ exports.withdraw = async (req, res, next) => {
 
     if (wallet.balance < amount) {
       // Record failed transaction
-      await Transaction.create({
+      await Transaction.create([{
         transactionId: `TXN-${Date.now()}`,
         senderId: req.user._id,
         amount,
         type: 'withdrawal',
         status: 'failed',
         suspiciousFlag: false,
-      });
+      }], { session });
       await createNotification(req.user._id, 'Withdrawal Failed', 'Insufficient funds for withdrawal.', 'transaction');
       res.status(400);
       throw new Error('Insufficient funds');
@@ -94,11 +102,11 @@ exports.withdraw = async (req, res, next) => {
 
     wallet.balance -= amount;
     wallet.totalWithdrawals += amount;
-    await wallet.save();
+    await wallet.save({ session });
 
     const { suspiciousFlag, suspiciousReasons } = checkSuspicious(req.user, amount, 'withdrawal', null);
 
-    const transaction = await Transaction.create({
+    const transaction = await Transaction.create([{
       transactionId: `TXN-${Date.now()}`,
       senderId: req.user._id,
       amount,
@@ -106,19 +114,23 @@ exports.withdraw = async (req, res, next) => {
       status: 'successful',
       suspiciousFlag,
       suspiciousReasons,
-    });
+    }], { session });
 
-    await createNotification(req.user._id, 'Withdrawal Successful', `Withdrew PKR ${amount}`, 'transaction', transaction._id);
+    await createNotification(req.user._id, 'Withdrawal Successful', `Withdrew PKR ${amount}`, 'transaction', transaction[0]._id);
     if (wallet.balance < 5000) {
       await createNotification(req.user._id, 'Low Balance', 'Your wallet balance is running low.', 'account');
     }
     if (suspiciousFlag) {
-      await createNotification(req.user._id, 'Suspicious Activity Detected', 'Your recent withdrawal was flagged.', 'security', transaction._id);
+      await createNotification(req.user._id, 'Suspicious Activity Detected', 'Your recent withdrawal was flagged.', 'security', transaction[0]._id);
     }
 
-    res.status(200).json({ success: true, data: { wallet, transaction } });
+    await session.commitTransaction();
+    res.status(200).json({ success: true, data: { wallet, transaction: transaction[0] } });
   } catch (error) {
+    await session.abortTransaction();
     next(error);
+  } finally {
+    session.endSession();
   }
 };
 

@@ -7,6 +7,11 @@ exports.register = async (req, res, next) => {
   try {
     const { name, email, password, cnic, role, age } = req.body;
 
+    if (!password || password.length < 6) {
+      res.status(400);
+      throw new Error('Password must be at least 6 characters long');
+    }
+
     const userExists = await User.findOne({ email });
     if (userExists) {
       res.status(400);
