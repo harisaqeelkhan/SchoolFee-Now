@@ -11,9 +11,23 @@ const Landing = () => {
         The smarter way to manage and pay school fees with our BNPL solutions.
       </p>
       
-      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '4rem' }}>
-        <Link to="/login" className="btn btn-secondary">Login</Link>
-        <Link to="/register" className="btn btn-primary">Create an Account</Link>
+      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '4rem', flexWrap: 'wrap' }}>
+        <div className="card" style={{ width: '200px' }}>
+          <h3>Parent Portal</h3>
+          <Link to="/login" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }}>Login as Parent</Link>
+        </div>
+        <div className="card" style={{ width: '200px' }}>
+          <h3>Student Portal</h3>
+          <Link to="/login" className="btn btn-secondary" style={{ width: '100%', marginTop: '1rem' }}>Login as Student</Link>
+        </div>
+        <div className="card" style={{ width: '200px' }}>
+          <h3>School Portal</h3>
+          <Link to="/login" className="btn btn-secondary" style={{ width: '100%', marginTop: '1rem' }}>Login as School</Link>
+        </div>
+        <div className="card" style={{ width: '200px' }}>
+          <h3>System Admin</h3>
+          <Link to="/login" className="btn btn-secondary" style={{ width: '100%', marginTop: '1rem' }}>Master Login</Link>
+        </div>
       </div>
 
       <h2>How it Works</h2>

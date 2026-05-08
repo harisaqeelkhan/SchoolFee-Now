@@ -26,7 +26,17 @@ const Sidebar = () => {
     { name: 'Categories', path: '/admin/categories', icon: <FaList /> },
   ];
 
-  const links = user.role === 'school_admin' ? adminLinks : parentLinks;
+  const systemAdminLinks = [
+    { name: 'System Dashboard', path: '/system/dashboard', icon: <FaHome /> },
+  ];
+
+  const studentLinks = [
+    { name: 'Student Portal', path: '/student/dashboard', icon: <FaHome /> },
+  ];
+
+  const links = user.role === 'system_admin' ? systemAdminLinks : 
+                user.role === 'school_admin' ? adminLinks : 
+                user.role === 'student' ? studentLinks : parentLinks;
 
   return (
     <aside style={{ width: '250px', background: 'var(--surface)', borderRight: '1px solid var(--border-light)', padding: '1rem', height: 'calc(100vh - 64px)', overflowY: 'auto' }}>

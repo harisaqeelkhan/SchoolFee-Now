@@ -31,6 +31,10 @@ import AdminTransactions from '../pages/admin/AdminTransactions';
 import FeeCategories from '../pages/admin/FeeCategories';
 import AdminReports from '../pages/admin/AdminReports';
 
+// New Portals
+import SystemDashboard from '../pages/admin/SystemDashboard';
+import StudentDashboard from '../pages/public/StudentDashboard';
+
 const AppRoutes = () => {
   return (
     <Layout>
@@ -65,6 +69,11 @@ const AppRoutes = () => {
           <Route path="/admin/reports" element={<AdminReports />} />
           <Route path="/admin/notifications" element={<Notifications />} />
           <Route path="/admin/profile" element={<Profile />} />
+        </Route>
+
+        <Route element={<ProtectedRoute />}>
+          <Route path="/system/dashboard" element={<SystemDashboard />} />
+          <Route path="/student/dashboard" element={<StudentDashboard />} />
         </Route>
 
         {/* 404 Catch All */}

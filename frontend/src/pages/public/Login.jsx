@@ -22,8 +22,12 @@ const Login = () => {
       const { data } = await api.post('/auth/login', { email, password });
       login(data.data, data.data.token);
       
-      if (data.data.role === 'school_admin') {
+      if (data.data.role === 'system_admin') {
+        navigate('/system/dashboard');
+      } else if (data.data.role === 'school_admin') {
         navigate('/admin/dashboard');
+      } else if (data.data.role === 'student') {
+        navigate('/student/dashboard');
       } else {
         navigate('/dashboard');
       }
