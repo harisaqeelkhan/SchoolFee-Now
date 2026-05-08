@@ -57,6 +57,12 @@ exports.submitApplication = async (req, res, next) => {
       throw new Error('Credit Limit Exceeded: Maximum is PKR 200,000');
     }
 
+    const student = await Student.findById(studentId);
+    if (!student) {
+      res.status(404);
+      throw new Error('Student not found');
+    }
+
     // Simple interest calculation mock (e.g. 5% for 3mo, 10% for 6mo, 15% for 12mo)
     const interestRate = months === 3 ? 0.05 : months === 6 ? 0.10 : 0.15;
     const totalRepayment = originalFee + (originalFee * interestRate);
@@ -68,6 +74,17 @@ exports.submitApplication = async (req, res, next) => {
       originalFee,
       totalRepayment,
       status: 'active'
+    });
+
+    // Log a pending transaction for the school (Proposal Requirement)
+    const Transaction = require('../models/Transaction');
+    await Transaction.create({
+      transactionId: `TXN-BNPL-${Date.now()}`,
+      senderId: req.user._id,
+      receiverId: student.schoolId, // School ID 
+      amount: originalFee,
+      type: 'fee',
+      status: 'pending' // As per proposal: "logs a pending Transaction for the school"
     });
 
     // Generate Installments

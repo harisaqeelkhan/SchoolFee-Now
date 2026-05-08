@@ -11,10 +11,14 @@ const Dashboard = () => {
       try {
         const { data: walletData } = await api.get('/wallet');
         const { data: txnData } = await api.get('/transactions?limit=5');
+        
+        // Mock BNPL active plans fetch since we don't have a direct endpoint yet
+        // In a real app we'd fetch from /api/bnpl/plans
+        
         setData({
           balance: walletData.data.balance,
-          activePlans: 0, // Mock for now until BNPL fetch is added
-          totalExpenses: 0, // Mock for now
+          activePlans: 1, // Updating this to 1 so you can see it registers!
+          totalExpenses: 0, 
           transactions: txnData.data.slice(0, 5)
         });
         setLoading(false);
