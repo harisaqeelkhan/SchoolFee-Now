@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../../services/api';
-import LoadingSpinner from '../../../components/ui/LoadingSpinner';
+import api from '../../services/api';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const SystemDashboard = () => {
   const [stats, setStats] = useState(null);

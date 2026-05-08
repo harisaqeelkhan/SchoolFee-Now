@@ -14,4 +14,8 @@ start "SchoolFee Now - Frontend" cmd /k "npm run dev"
 echo.
 echo Both servers are launching in separate windows!
 echo Make sure MongoDB is running locally on your machine.
+echo.
+echo Launching Browser...
+timeout /t 3 /nobreak > nul
+start http://localhost:5173
 echo ========================================================
