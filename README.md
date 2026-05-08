@@ -91,9 +91,9 @@ For your convenience, simply double-click the **`start.bat`** file located in th
 
 ## 🌐 Deployment Information
 
-- **Backend (Render/Heroku):** Set `NODE_ENV=production` and map your local environment variables into the platform dashboard.
-- **Database (MongoDB Atlas):** Replace the local `MONGO_URI` in your production environment with your cloud connection string.
-- **Frontend (Vercel/Netlify):** Update `frontend/src/services/api.js` to point away from `localhost` and towards your newly deployed backend URL.
+- **Frontend (Live Demo):** [https://school-fee-now.vercel.app](https://school-fee-now.vercel.app)
+- **Backend API (Render):** [https://schoolfee-now-backend.onrender.com](https://schoolfee-now-backend.onrender.com)
+- **Database:** MongoDB Atlas (Cloud)
 
 ### GitHub Sync
 Double click the **`sync.bat`** script in the root directory. This will securely format, commit, and push your entire codebase directly to your GitHub repository while safely ignoring `.env` files via `.gitignore`.
