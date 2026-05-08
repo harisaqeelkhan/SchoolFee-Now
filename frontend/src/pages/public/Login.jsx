@@ -11,8 +11,17 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
-  const { login } = useContext(AuthContext);
+  const { user, login } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (user) {
+      if (user.role === 'system_admin') navigate('/system/dashboard');
+      else if (user.role === 'school_admin') navigate('/admin/dashboard');
+      else if (user.role === 'student') navigate('/student/dashboard');
+      else navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
