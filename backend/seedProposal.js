@@ -6,10 +6,7 @@ const FeeStructure = require('./models/FeeStructure');
 
 dotenv.config();
 
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => console.log('DB Connected')).catch(err => console.log(err));
+mongoose.connect(process.env.MONGO_URI).then(() => console.log('DB Connected')).catch(err => console.log(err));
 
 const seedData = async () => {
   try {
