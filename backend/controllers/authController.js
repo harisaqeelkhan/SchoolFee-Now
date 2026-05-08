@@ -21,7 +21,7 @@ exports.register = async (req, res, next) => {
       email,
       passwordHash,
       cnic,
-      role: role || 'parent', // default role
+      role: 'parent', // Force public registration to parent (Req 28)
     });
 
     // Automatically create a Wallet document linked to this User
