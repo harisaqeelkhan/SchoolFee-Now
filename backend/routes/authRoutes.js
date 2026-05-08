@@ -4,7 +4,7 @@ const { validateBody } = require('../middlewares/validationMiddleware');
 const { protect } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
-router.post('/register', validateBody(['name', 'email', 'password', 'role']), register);
+router.post('/register', validateBody(['name', 'email', 'password']), register);
 router.post('/login', validateBody(['email', 'password']), login);
 
 router.use(protect);
