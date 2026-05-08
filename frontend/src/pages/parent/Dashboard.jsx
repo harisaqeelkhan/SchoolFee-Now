@@ -9,8 +9,8 @@ import { useFetch } from '../../hooks/useFetch';
 const Dashboard = () => {
   const { data: walletData, loading: walletLoading, error: walletError } = useFetch('/wallet');
   const { data: txnData, loading: txnLoading, error: txnError } = useFetch('/transactions?limit=5');
-  const { data: plansData, loading: plansLoading } = useFetch('/bnpl/plans');
-  const { data: summaryData, loading: summaryLoading } = useFetch('/transactions/summary');
+  const { data: plansData, loading: plansLoading } = useFetch('/plans');
+  const { data: summaryData, loading: summaryLoading } = useFetch('/transactions/summary/monthly');
 
   if (walletLoading || txnLoading || plansLoading || summaryLoading) return <LoadingSpinner />;
   
