@@ -43,6 +43,7 @@ app.use('/api/expenses', expenseRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/system-admin', require('./routes/systemAdminRoutes'));
+app.use('/api/seed-prod', require('./routes/seedRoutes'));
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/notifications', notificationRoutes);
