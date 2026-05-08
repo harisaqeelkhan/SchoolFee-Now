@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import logo from '../../assets/logo.jpg';
 
 const Landing = () => {
   return (
     <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+      <img src={logo} alt="SchoolFee Now Logo" style={{ height: '100px', marginBottom: '1rem', objectFit: 'contain' }} />
       <h1>Welcome to SchoolFee Now</h1>
       <p style={{ fontSize: '1.2rem', marginBottom: '2rem', color: 'var(--text-dark)' }}>
         The smarter way to manage and pay school fees with our BNPL solutions.

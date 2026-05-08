@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import { FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
+import logo from '../../assets/logo.jpg';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
@@ -15,7 +16,9 @@ const Navbar = () => {
   return (
     <nav style={{ background: 'var(--surface)', padding: '1rem', borderBottom: '1px solid var(--border-light)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <div>
-        <Link to="/" style={{ fontWeight: 'bold', fontSize: '1.25rem', color: 'var(--primary)' }}>SchoolFee Now</Link>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
+          <img src={logo} alt="SchoolFee Now Logo" style={{ height: '40px', objectFit: 'contain' }} />
+        </Link>
       </div>
       <div className="flex items-center gap-4">
         {user ? (
