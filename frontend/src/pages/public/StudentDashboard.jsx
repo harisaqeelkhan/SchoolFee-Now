@@ -8,8 +8,8 @@ const StudentDashboard = () => {
         Welcome! Your school fee payments and active BNPL plans are managed by your linked Parent account.
       </p>
       <div className="card" style={{ maxWidth: '400px', margin: '2rem auto', padding: '2rem' }}>
-        <h3>Status: Enrolled</h3>
-        <p>No pending actions required.</p>
+        <h3 style={{ color: 'var(--text-light)' }}>Academic Records Pending</h3>
+        <p>Your institutional data is syncing.</p>
       </div>
     </div>
   );
