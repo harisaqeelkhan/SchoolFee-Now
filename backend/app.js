@@ -38,7 +38,7 @@ app.use(limiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', authRoutes); // alias for /users/profile
 app.use('/api/wallet', walletRoutes);
-app.use('/api/bnpl', bnplRoutes);
+app.use('/api', bnplRoutes); // Maps to /api/students/link, /api/applications, etc.
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/admin', adminRoutes);
