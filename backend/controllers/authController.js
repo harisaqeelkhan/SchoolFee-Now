@@ -24,11 +24,24 @@ exports.register = async (req, res, next) => {
       role: 'parent', // Force public registration to parent (Req 28)
     });
 
-    // Automatically create a Wallet document linked to this User
-    await Wallet.create({
+    // Automatically create a Wallet document linked to this User with 50000 sign-up bonus
+    const wallet = await Wallet.create({
       userId: user._id,
-      balance: 0,
+      balance: 50000,
+      totalDeposits: 50000,
       currency: 'PKR',
+    });
+
+    // Create a transaction record for the initial deposit
+    const Transaction = require('../models/Transaction');
+    const { generateTransactionId } = require('../utils/helpers');
+    await Transaction.create({
+      transactionId: generateTransactionId(),
+      type: 'deposit',
+      amount: 50000,
+      status: 'successful',
+      senderId: user._id,
+      receiverId: user._id,
     });
 
     res.status(201).json({
