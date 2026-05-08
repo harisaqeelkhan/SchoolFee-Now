@@ -63,3 +63,21 @@ exports.getTransactionById = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getTransactionSummary = async (req, res, next) => {
+  try {
+    const summary = await Transaction.aggregate([
+      { $match: { $or: [{ senderId: req.user._id }, { receiverId: req.user._id }] } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+          totalAmount: { $sum: "$amount" }
+        }
+      },
+      { $sort: { _id: -1 } }
+    ]);
+    res.status(200).json({ success: true, data: summary });
+  } catch (error) {
+    next(error);
+  }
+};

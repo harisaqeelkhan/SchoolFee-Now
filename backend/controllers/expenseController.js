@@ -20,6 +20,24 @@ exports.getExpenseSummary = async (req, res, next) => {
   }
 };
 
+exports.getCategoryExpenseSummary = async (req, res, next) => {
+  try {
+    const summary = await Expense.aggregate([
+      { $match: { userId: req.user._id } },
+      {
+        $group: {
+          _id: "$category",
+          totalAmount: { $sum: "$amount" }
+        }
+      },
+      { $sort: { totalAmount: -1 } }
+    ]);
+    res.status(200).json({ success: true, data: summary });
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.getExpenses = async (req, res, next) => {
   try {
     const expenses = await Expense.find({ userId: req.user._id });
@@ -114,6 +132,51 @@ exports.setBudget = async (req, res, next) => {
     }
 
     res.status(200).json({ success: true, data: budget });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getBudgets = async (req, res, next) => {
+  try {
+    const budgets = await Budget.find({ userId: req.user._id });
+    res.status(200).json({ success: true, data: budgets });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.updateBudget = async (req, res, next) => {
+  try {
+    const budget = await Budget.findById(req.params.id);
+    if (!budget) {
+      res.status(404);
+      throw new Error('Budget not found');
+    }
+    if (budget.userId.toString() !== req.user._id.toString()) {
+      res.status(403);
+      throw new Error('Not authorized');
+    }
+    const updated = await Budget.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.status(200).json({ success: true, data: updated });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.deleteBudget = async (req, res, next) => {
+  try {
+    const budget = await Budget.findById(req.params.id);
+    if (!budget) {
+      res.status(404);
+      throw new Error('Budget not found');
+    }
+    if (budget.userId.toString() !== req.user._id.toString()) {
+      res.status(403);
+      throw new Error('Not authorized');
+    }
+    await budget.remove();
+    res.status(200).json({ success: true, data: {} });
   } catch (error) {
     next(error);
   }

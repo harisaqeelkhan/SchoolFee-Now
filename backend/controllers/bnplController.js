@@ -36,7 +36,7 @@ exports.apply = async (req, res, next) => {
       senderId: req.user._id,
       receiverId: systemAdmin._id,
       amount, // Entire fee is settled by BNPL provider to the school
-      type: 'fee_payment',
+      type: 'fee',
       status: 'successful',
     });
 

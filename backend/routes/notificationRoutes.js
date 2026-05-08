@@ -1,11 +1,13 @@
 const express = require('express');
-const { getNotifications, markAsRead } = require('../controllers/notificationController');
+const { getNotifications, markAsRead, markAllAsRead } = require('../controllers/notificationController');
 const { protect } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
 router.use(protect);
 
 router.get('/', getNotifications);
-router.put('/:id/read', markAsRead);
+router.patch('/read-all', markAllAsRead);
+router.patch('/:id/read', markAsRead);
+router.put('/:id/read', markAsRead); // Keep old one for backward compatibility
 
 module.exports = router;

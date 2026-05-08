@@ -88,6 +88,10 @@ exports.login = async (req, res, next) => {
   }
 };
 
+exports.logout = (req, res) => {
+  res.status(200).json({ success: true, message: 'Logged out successfully' });
+};
+
 exports.getProfile = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id).select('-passwordHash');

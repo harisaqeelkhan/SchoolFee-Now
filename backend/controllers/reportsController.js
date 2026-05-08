@@ -27,6 +27,28 @@ exports.getUserReport = async (req, res, next) => {
   }
 };
 
+exports.getIncomeExpenseReport = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const incomeExpense = await Wallet.findOne({ userId }).select('totalDeposits totalWithdrawals totalTransfersOut totalTransfersIn');
+    res.status(200).json({ success: true, data: incomeExpense });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getBudgetUsageReport = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    // Just pulling all budgets as summary for now
+    const Budget = require('../models/Budget');
+    const budgets = await Budget.find({ userId });
+    res.status(200).json({ success: true, data: budgets });
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.getAdminReport = async (req, res, next) => {
   try {
     // Transaction volume by day (last 7 days)

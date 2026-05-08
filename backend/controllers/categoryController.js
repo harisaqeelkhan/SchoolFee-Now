@@ -13,6 +13,12 @@ exports.getCategories = async (req, res, next) => {
 exports.createCategory = async (req, res, next) => {
   try {
     const { name, type, description } = req.body;
+    
+    if (!name || name.trim() === '') {
+      res.status(400);
+      throw new Error('Category name cannot be empty');
+    }
+
     const category = await Category.create({
       name,
       type,

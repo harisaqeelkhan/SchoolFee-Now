@@ -17,6 +17,8 @@ exports.getWallet = async (req, res, next) => {
   }
 };
 
+exports.getWalletSummary = exports.getWallet; // Same payload for now
+
 exports.deposit = async (req, res, next) => {
   try {
     const { amount } = req.body;
@@ -169,11 +171,12 @@ exports.transfer = async (req, res, next) => {
 
     senderWallet.balance -= amount;
     senderWallet.totalTransfersOut += amount;
-    await senderWallet.save();
-
+    
     receiverWallet.balance += amount;
     receiverWallet.totalTransfersIn += amount;
-    await receiverWallet.save();
+    
+    // Save both simultaneously to avoid partial updates (Rule 33)
+    await Promise.all([senderWallet.save(), receiverWallet.save()]);
 
     const { suspiciousFlag, suspiciousReasons } = checkSuspicious(req.user, amount, 'transfer', receiver._id.toString());
 

@@ -24,6 +24,19 @@ exports.getUsers = async (req, res, next) => {
   }
 };
 
+exports.getUserById = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id).select('-passwordHash');
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.toggleUserBlock = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
@@ -130,6 +143,26 @@ exports.getDashboardData = async (req, res, next) => {
         totalDemoBalance
       }
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getTransactionVolume = async (req, res, next) => {
+  try {
+    const allTxns = await Transaction.find({ status: 'successful' });
+    const volume = allTxns.reduce((acc, curr) => acc + curr.amount, 0);
+    res.status(200).json({ success: true, data: { transactionVolume: volume } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getSystemBalance = async (req, res, next) => {
+  try {
+    const wallets = await Wallet.find();
+    const totalDemoBalance = wallets.reduce((acc, curr) => acc + curr.balance, 0);
+    res.status(200).json({ success: true, data: { systemBalance: totalDemoBalance } });
   } catch (error) {
     next(error);
   }
