@@ -41,9 +41,9 @@ const AdminLogin = () => {
         {error && <AlertError message={error} />}
         <form onSubmit={handleLogin}>
           <div className="form-group">
-            <label>Master Email</label>
+            <label>Master Username</label>
             <input 
-              type="email" 
+              type="text" 
               className="form-input" 
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
