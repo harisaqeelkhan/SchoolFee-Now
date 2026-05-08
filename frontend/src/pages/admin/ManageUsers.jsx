@@ -2,6 +2,18 @@ import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
+const StatusBadge = ({ status }) => (
+  <span 
+    className="badge" 
+    style={{ 
+      background: status === 'active' ? '#e0e0e0' : 'var(--primary)', 
+      color: status === 'active' ? 'var(--primary)' : 'var(--surface)' 
+    }}
+  >
+    {status}
+  </span>
+);
+
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -53,9 +65,7 @@ const ManageUsers = () => {
                   <td>{u.name}</td>
                   <td>{u.email}</td>
                   <td>
-                    <span className="badge" style={{ background: u.status === 'active' ? '#e0e0e0' : 'var(--primary)', color: u.status === 'active' ? 'var(--primary)' : 'var(--surface)' }}>
-                      {u.status}
-                    </span>
+                    <StatusBadge status={u.status} />
                   </td>
                   <td>
                     <button className="btn btn-secondary" onClick={() => toggleStatus(u._id)}>
