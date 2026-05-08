@@ -23,8 +23,18 @@ echo Adding files to staging...
 git add .
 
 echo.
+set /p commitMsg="Enter commit title (required): "
+if "%commitMsg%"=="" set commitMsg=Automated sync: Updated files
+
+set /p commitDesc="Enter commit description (optional, press Enter to skip): "
+
+echo.
 echo Committing changes...
-git commit -m "Automated sync: Updated backend modules, frontend UI, and NFRs"
+if "%commitDesc%"=="" (
+    git commit -m "%commitMsg%"
+) else (
+    git commit -m "%commitMsg%" -m "%commitDesc%"
+)
 
 echo.
 echo Pushing to GitHub (main branch)...
