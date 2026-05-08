@@ -102,7 +102,7 @@ exports.deleteExpense = async (req, res, next) => {
       throw new Error('Not authorized to delete this expense');
     }
 
-    await expense.remove();
+    await Expense.deleteOne({ _id: req.params.id });
     res.status(200).json({ success: true, data: {} });
   } catch (error) {
     next(error);
@@ -175,7 +175,7 @@ exports.deleteBudget = async (req, res, next) => {
       res.status(403);
       throw new Error('Not authorized');
     }
-    await budget.remove();
+    await Budget.deleteOne({ _id: req.params.id });
     res.status(200).json({ success: true, data: {} });
   } catch (error) {
     next(error);

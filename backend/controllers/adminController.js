@@ -5,7 +5,7 @@ const { createNotification } = require('./notificationController');
 
 exports.getUsers = async (req, res, next) => {
   try {
-    const { search, status } = req.query;
+    const { search, status, page = 1, limit = 10 } = req.query;
     let query = { role: 'parent' };
 
     if (status) query.status = status;
@@ -17,8 +17,22 @@ exports.getUsers = async (req, res, next) => {
       ];
     }
 
-    const users = await User.find(query).select('-passwordHash');
-    res.status(200).json({ success: true, data: users });
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const users = await User.find(query)
+      .select('-passwordHash')
+      .skip(skip)
+      .limit(parseInt(limit));
+      
+    const total = await User.countDocuments(query);
+
+    res.status(200).json({ 
+      success: true, 
+      count: users.length,
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / parseInt(limit)),
+      data: users 
+    });
   } catch (error) {
     next(error);
   }
@@ -82,7 +96,7 @@ exports.getFlaggedTransactions = async (req, res, next) => {
 
 exports.getAllTransactions = async (req, res, next) => {
   try {
-    const { type, status, startDate, endDate, category, search, suspiciousFlag } = req.query;
+    const { type, status, startDate, endDate, category, search, suspiciousFlag, page = 1, limit = 20 } = req.query;
     
     let query = {};
 
@@ -104,12 +118,25 @@ exports.getAllTransactions = async (req, res, next) => {
       ];
     }
 
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
     const transactions = await Transaction.find(query)
       .populate('senderId', 'name email')
       .populate('receiverId', 'name email')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
 
-    res.status(200).json({ success: true, data: transactions });
+    const total = await Transaction.countDocuments(query);
+
+    res.status(200).json({ 
+      success: true, 
+      count: transactions.length,
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / parseInt(limit)),
+      data: transactions 
+    });
   } catch (error) {
     next(error);
   }

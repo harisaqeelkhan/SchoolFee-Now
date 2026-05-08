@@ -1,10 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../../services/api';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const AdminWallets = () => {
-  const wallets = [
-    { id: '1', user: 'Parent One', email: 'parent1@test.com', balance: 150000 },
-    { id: '2', user: 'Parent Two', email: 'parent2@test.com', balance: 5000 },
-  ];
+  const [wallets, setWallets] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchWallets = async () => {
+      try {
+        const { data } = await api.get('/admin/wallets');
+        setWallets(data.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchWallets();
+  }, []);
+
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div>
@@ -21,9 +37,9 @@ const AdminWallets = () => {
             </thead>
             <tbody>
               {wallets.map(w => (
-                <tr key={w.id}>
-                  <td>{w.user}</td>
-                  <td>{w.email}</td>
+                <tr key={w._id}>
+                  <td>{w.userId?.name || 'N/A'}</td>
+                  <td>{w.userId?.email || 'N/A'}</td>
                   <td>{w.balance.toLocaleString()}</td>
                 </tr>
               ))}

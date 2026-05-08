@@ -1,10 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../../services/api';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const FlaggedTransactions = () => {
-  const flagged = [
-    { id: 'TXN-999', user: 'Parent One', amount: 500000, date: '2026-05-07', reason: 'Amount exceeded 100,000 PKR limit' },
-    { id: 'TXN-1002', user: 'Parent Two', amount: 200, date: '2026-05-08', reason: 'Multiple micro-transactions detected' },
-  ];
+  const [flagged, setFlagged] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFlagged = async () => {
+      try {
+        const { data } = await api.get('/admin/transactions/flagged');
+        setFlagged(data.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFlagged();
+  }, []);
+
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div>
@@ -23,13 +39,17 @@ const FlaggedTransactions = () => {
             </thead>
             <tbody>
               {flagged.map(f => (
-                <tr key={f.id}>
-                  <td>{f.id}</td>
-                  <td>{f.user}</td>
+                <tr key={f._id}>
+                  <td>{f.transactionId}</td>
+                  <td>{f.senderId?.name || 'N/A'}</td>
                   <td>{f.amount.toLocaleString()}</td>
-                  <td>{f.date}</td>
+                  <td>{new Date(f.createdAt).toLocaleDateString()}</td>
                   <td>
-                    <span className="badge badge-flagged">{f.reason}</span>
+                    {f.suspiciousReasons?.map((reason, idx) => (
+                      <span key={idx} className="badge badge-flagged" style={{ marginRight: '4px', marginBottom: '4px', display: 'inline-block' }}>
+                        {reason}
+                      </span>
+                    ))}
                   </td>
                 </tr>
               ))}

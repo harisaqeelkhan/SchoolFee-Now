@@ -1,17 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../../services/api';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const FeeCategories = () => {
-  const [categories, setCategories] = useState([
-    { id: 1, name: 'Tuition', description: 'Monthly tuition fees' },
-    { id: 2, name: 'Transport', description: 'Bus and van fees' },
-  ]);
+  const [categories, setCategories] = useState([]);
   const [newCat, setNewCat] = useState({ name: '', description: '' });
+  const [loading, setLoading] = useState(true);
 
-  const handleAdd = (e) => {
-    e.preventDefault();
-    setCategories([...categories, { id: Date.now(), ...newCat }]);
-    setNewCat({ name: '', description: '' });
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const { data } = await api.get('/admin/categories');
+      setCategories(data.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    try {
+      const { data } = await api.post('/admin/categories', newCat);
+      setCategories([...categories, data.data]);
+      setNewCat({ name: '', description: '' });
+    } catch (err) {
+      console.error("Failed to add category", err);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/admin/categories/${id}`);
+      setCategories(categories.filter(cat => cat._id !== id));
+    } catch (err) {
+      console.error("Failed to delete category", err);
+    }
+  };
+
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div>
@@ -39,12 +70,12 @@ const FeeCategories = () => {
             </thead>
             <tbody>
               {categories.map(c => (
-                <tr key={c.id}>
+                <tr key={c._id}>
                   <td>{c.name}</td>
                   <td>{c.description}</td>
                   <td>
                     <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem', marginRight: '0.5rem' }}>Edit</button>
-                    <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem', color: 'red', borderColor: 'red' }} onClick={() => setCategories(categories.filter(cat => cat.id !== c.id))}>Delete</button>
+                    <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem', color: 'red', borderColor: 'red' }} onClick={() => handleDelete(c._id)}>Delete</button>
                   </td>
                 </tr>
               ))}

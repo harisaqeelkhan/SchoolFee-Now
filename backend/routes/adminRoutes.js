@@ -20,8 +20,10 @@ router.get('/reports/transaction-volume', getTransactionVolume);
 router.get('/reports/system-balance', getSystemBalance);
 
 // Alias /admin/categories to category controller
+router.get('/categories', require('../controllers/categoryController').getCategories);
 router.post('/categories', createCategory);
 router.put('/categories/:id', updateCategory);
 router.patch('/categories/:id/disable', updateCategory);
+router.delete('/categories/:id', deleteCategory);
 
 module.exports = router;

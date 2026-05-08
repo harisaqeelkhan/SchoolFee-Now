@@ -81,10 +81,10 @@ exports.submitApplication = async (req, res, next) => {
     await Transaction.create({
       transactionId: `TXN-BNPL-${Date.now()}`,
       senderId: req.user._id,
-      receiverId: student.schoolId, // School ID 
       amount: originalFee,
       type: 'fee',
-      status: 'pending' // As per proposal: "logs a pending Transaction for the school"
+      status: 'pending', // As per proposal: "logs a pending Transaction for the school"
+      description: `BNPL Application for Student: ${student.studentId}`
     });
 
     // Generate Installments

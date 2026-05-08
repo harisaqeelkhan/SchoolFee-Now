@@ -1,14 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../../services/api';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const ManageUsers = () => {
-  const [users, setUsers] = useState([
-    { id: '1', name: 'Parent One', email: 'parent1@test.com', status: 'active' },
-    { id: '2', name: 'Parent Two', email: 'parent2@test.com', status: 'blocked' },
-  ]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const toggleStatus = (id) => {
-    setUsers(users.map(u => u.id === id ? { ...u, status: u.status === 'active' ? 'blocked' : 'active' } : u));
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const { data } = await api.get('/admin/users');
+      setUsers(data.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const toggleStatus = async (id) => {
+    try {
+      await api.patch(`/admin/users/${id}/block`);
+      // Update local state to reflect change without full reload
+      setUsers(users.map(u => u._id === id ? { ...u, status: u.status === 'active' ? 'blocked' : 'active' } : u));
+    } catch (err) {
+      console.error("Failed to toggle status", err);
+    }
+  };
+
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div>
@@ -26,7 +49,7 @@ const ManageUsers = () => {
             </thead>
             <tbody>
               {users.map(u => (
-                <tr key={u.id}>
+                <tr key={u._id}>
                   <td>{u.name}</td>
                   <td>{u.email}</td>
                   <td>
@@ -35,7 +58,7 @@ const ManageUsers = () => {
                     </span>
                   </td>
                   <td>
-                    <button className="btn btn-secondary" onClick={() => toggleStatus(u.id)}>
+                    <button className="btn btn-secondary" onClick={() => toggleStatus(u._id)}>
                       {u.status === 'active' ? 'Block User' : 'Unblock User'}
                     </button>
                   </td>

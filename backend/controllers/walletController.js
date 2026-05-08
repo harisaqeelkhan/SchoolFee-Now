@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Wallet = require('../models/Wallet');
 const Transaction = require('../models/Transaction');
 const User = require('../models/User');
@@ -122,6 +123,9 @@ exports.withdraw = async (req, res, next) => {
 };
 
 exports.transfer = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  
   try {
     const { receiverEmail, amount } = req.body;
 
@@ -130,7 +134,7 @@ exports.transfer = async (req, res, next) => {
       throw new Error('Amount must be positive');
     }
 
-    const receiver = await User.findOne({ email: receiverEmail });
+    const receiver = await User.findOne({ email: receiverEmail }).session(session);
     if (!receiver) {
       res.status(404);
       throw new Error('Receiver not found');
@@ -146,8 +150,8 @@ exports.transfer = async (req, res, next) => {
       throw new Error('Cannot transfer to yourself');
     }
 
-    const senderWallet = await Wallet.findOne({ userId: req.user._id });
-    const receiverWallet = await Wallet.findOne({ userId: receiver._id });
+    const senderWallet = await Wallet.findOne({ userId: req.user._id }).session(session);
+    const receiverWallet = await Wallet.findOne({ userId: receiver._id }).session(session);
 
     if (!senderWallet || !receiverWallet) {
       res.status(404);
@@ -155,7 +159,7 @@ exports.transfer = async (req, res, next) => {
     }
 
     if (senderWallet.balance < amount) {
-      await Transaction.create({
+      await Transaction.create([{
         transactionId: `TXN-${Date.now()}`,
         senderId: req.user._id,
         receiverId: receiver._id,
@@ -163,7 +167,7 @@ exports.transfer = async (req, res, next) => {
         type: 'transfer',
         status: 'failed',
         suspiciousFlag: false,
-      });
+      }], { session });
       await createNotification(req.user._id, 'Transfer Failed', 'Insufficient funds for transfer.', 'transaction');
       res.status(400);
       throw new Error('Insufficient funds');
@@ -175,12 +179,13 @@ exports.transfer = async (req, res, next) => {
     receiverWallet.balance += amount;
     receiverWallet.totalTransfersIn += amount;
     
-    // Save both simultaneously to avoid partial updates (Rule 33)
-    await Promise.all([senderWallet.save(), receiverWallet.save()]);
+    // Save both simultaneously inside the atomic transaction
+    await senderWallet.save({ session });
+    await receiverWallet.save({ session });
 
     const { suspiciousFlag, suspiciousReasons } = checkSuspicious(req.user, amount, 'transfer', receiver._id.toString());
 
-    const transaction = await Transaction.create({
+    const transaction = await Transaction.create([{
       transactionId: `TXN-${Date.now()}`,
       senderId: req.user._id,
       receiverId: receiver._id,
@@ -189,17 +194,21 @@ exports.transfer = async (req, res, next) => {
       status: 'successful',
       suspiciousFlag,
       suspiciousReasons,
-    });
+    }], { session });
 
-    await createNotification(req.user._id, 'Transfer Sent', `Transferred PKR ${amount} to ${receiver.email}`, 'transaction', transaction._id);
-    await createNotification(receiver._id, 'Transfer Received', `Received PKR ${amount} from ${req.user.email}`, 'transaction', transaction._id);
+    await createNotification(req.user._id, 'Transfer Sent', `Transferred PKR ${amount} to ${receiver.email}`, 'transaction', transaction[0]._id);
+    await createNotification(receiver._id, 'Transfer Received', `Received PKR ${amount} from ${req.user.email}`, 'transaction', transaction[0]._id);
 
     if (suspiciousFlag) {
-      await createNotification(req.user._id, 'Suspicious Activity Detected', 'Your recent transfer was flagged.', 'security', transaction._id);
+      await createNotification(req.user._id, 'Suspicious Activity Detected', 'Your recent transfer was flagged.', 'security', transaction[0]._id);
     }
 
-    res.status(200).json({ success: true, data: { senderWallet, transaction } });
+    await session.commitTransaction();
+    res.status(200).json({ success: true, data: { senderWallet, transaction: transaction[0] } });
   } catch (error) {
+    await session.abortTransaction();
     next(error);
+  } finally {
+    session.endSession();
   }
 };

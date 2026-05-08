@@ -29,9 +29,12 @@ const AdminTransactions = () => {
         <table>
           <thead>
             <tr>
+              <th>Date</th>
               <th>ID</th>
               <th>Type</th>
-              <th>Amount</th>
+              <th>Sender</th>
+              <th>Receiver</th>
+              <th>Amount (PKR)</th>
               <th>Status</th>
               <th>Flagged</th>
             </tr>
@@ -39,11 +42,18 @@ const AdminTransactions = () => {
           <tbody>
             {transactions.map(t => (
               <tr key={t._id}>
+                <td>{new Date(t.createdAt).toLocaleDateString()}</td>
                 <td>{t.transactionId}</td>
                 <td style={{ textTransform: 'capitalize' }}>{t.type}</td>
-                <td>PKR {t.amount}</td>
-                <td>{t.status}</td>
-                <td style={{ color: t.suspiciousFlag ? 'red' : 'green' }}>
+                <td>{t.senderId?.name || 'N/A'}</td>
+                <td>{t.receiverId?.name || 'N/A'}</td>
+                <td>{t.amount.toLocaleString()}</td>
+                <td>
+                  <span className="badge" style={{ background: t.status === 'successful' ? '#10b981' : t.status === 'failed' ? '#ef4444' : '#f59e0b', color: 'white' }}>
+                    {t.status}
+                  </span>
+                </td>
+                <td style={{ color: t.suspiciousFlag ? 'red' : 'green', fontWeight: 'bold' }}>
                   {t.suspiciousFlag ? 'Yes' : 'No'}
                 </td>
               </tr>
