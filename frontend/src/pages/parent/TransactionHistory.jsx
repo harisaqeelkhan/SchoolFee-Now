@@ -1,19 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import EmptyState from '../../components/ui/EmptyState';
+import api from '../../services/api';
 
 const TransactionHistory = () => {
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
-    setTimeout(() => {
-      setTransactions([
-        { id: 'TXN-001', type: 'deposit', amount: 50000, status: 'successful', date: '2026-05-01' },
-        { id: 'TXN-002', type: 'fee_payment', amount: 15000, status: 'successful', date: '2026-05-05' },
-      ]);
-      setLoading(false);
-    }, 1000);
+    const fetchTransactions = async () => {
+      try {
+        const { data } = await api.get('/transactions');
+        setTransactions(data.data || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTransactions();
   }, []);
 
   if (loading) return <LoadingSpinner />;
@@ -54,9 +59,9 @@ const TransactionHistory = () => {
               </thead>
               <tbody>
                 {transactions.map(txn => (
-                  <tr key={txn.id}>
-                    <td>{txn.date}</td>
-                    <td>{txn.id}</td>
+                  <tr key={txn._id}>
+                    <td>{new Date(txn.createdAt).toISOString().split('T')[0]}</td>
+                    <td>{txn.transactionId}</td>
                     <td style={{ textTransform: 'capitalize' }}>{txn.type.replace('_', ' ')}</td>
                     <td>{txn.amount.toLocaleString()}</td>
                     <td>
