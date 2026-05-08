@@ -34,9 +34,8 @@ exports.register = async (req, res, next) => {
 
     // Create a transaction record for the initial deposit
     const Transaction = require('../models/Transaction');
-    const { generateTransactionId } = require('../utils/helpers');
     await Transaction.create({
-      transactionId: generateTransactionId(),
+      transactionId: `TXN-DEP-${Date.now()}-${Math.floor(Math.random()*1000)}`,
       type: 'deposit',
       amount: 50000,
       status: 'successful',
